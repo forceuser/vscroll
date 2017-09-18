@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+	<head>
+		<title>vscroll demo</title>
+		<script src="./dist/vscroll.js"></script>
+		<script src="//cdn.rawgit.com/forceuser/sqnc/1.0.9/dist/sqnc.min.js">
+		</script>
+	</head>
+	<body>
+		<div id="scrollContainer">
+		</div>
+		<style>
+			.list-item {
+				padding: 15px;
+				margin-bottom: 10px;
+			}
+		</style>
+
+		<div id="scrl" style="height: 600px; width: 300px; position: relative; ">
+			<div class="scroll" style="position: relative; background: rgba(255, 0, 0, 0.2); overflow: auto; max-height: 100%; position: relative;">
+				<div
+					class="items"
+					style="
+						position: absolute;
+						top: 0; left: 0;
+						width: 100%;
+						background: rgba(0, 125, 255, 0.2);
+						transform: translateY(0px); max-height: 100%;
+						overflow: hidden;
+						">
+						<div class="items-content">
+						</div>
+				</div>
+				<div class="filler" style="height: 8000px; position: relative;">
+				</div>
+			</div>
+		</div>
+
+		<script>
+		function randomInteger(min, max) {
+			var rand = min + Math.random() * (max + 1 - min);
+			rand = Math.floor(rand);
+			return rand;
+		}
+
+		// const s = vscroll(document.querySelector(".scroller"));
+		const colors = ["1abc9c", "2ecc71", "3498db", "9b59b6", "34495e", "f1c40f", "e67e22", "e74c3c"];
+		const data = sqnc(() => ({
+			height: randomInteger(100, 200),
+			color: colors[randomInteger(0, colors.length - 1)]
+		}), 52);
+
+		const scrl = document.querySelector("#scrl");
+		const $scroll = scrl.querySelector(":scope > .scroll");
+		const $items = $scroll.querySelector(":scope > .items");
+		const $itemsContent = $items.querySelector(":scope > .items-content");
+		data.forEach((item, idx) => $itemsContent.appendChild(toDom(`<div
+				class="list-item"
+				style="
+					color: white;
+					background-color: #${item.color};
+					height: ${item.height}px;">
+				item ${idx}
+			</div>`)[0]));
+
+		$scroll.addEventListener("scroll", event => {
+			const pos = $scroll.scrollTop / ($scroll.scrollHeight - $scroll.clientHeight) * data.length;
+			const itemIdx = Math.floor(pos);
+			const itemTop = pos - itemIdx;
+			const $ch = $items.children[itemIdx];
+			console.log("pos", itemTop, itemIdx, $items.children[itemIdx]);
+			const rect = $ch.getBoundingClientRect();
+			$items.style.transform = `translateY(${$scroll.scrollTop}px)`;
+		});
+
+		function toDom (html) {
+			if (!toDom.div) {
+				toDom.div = document.createElement("div");
+			}
+			toDom.div.innerHTML = html;
+			return [...toDom.div.childNodes];
+		}
+
+		// new VScroll(document.querySelector("#scrollContainer"), (idx) => {
+		// 	const elData = data[idx];
+		// 	const el = toDom(`<div style="color: white; background-color: ${elData.color}; height: ${elData.height}px;">item ${idx}</div>`);
+		//
+		// 	return el;
+		// });
+		//
+		// console.log("data", data);
+		</script>
+	</body>
+</html>
